@@ -1,0 +1,15 @@
+digraph PostDomTree {
+  rankdir=TB;
+  node [shape=box, fontname="Helvetica", style=filled];
+  n0 [label="x := 4", fillcolor=lightgreen];
+  n1 [label="if (y)", fillcolor=lightyellow];
+  n3 [label="y := x + z", fillcolor=lightgreen];
+  n4 [label="return z", fillcolor=lightblue];
+  n5 [label="EXIT", fillcolor=lightcoral];
+  n2 [label="z := x + 1", fillcolor=lightgreen];
+  n5 -> n0;
+  n5 -> n1;
+  n5 -> n3;
+  n5 -> n4;
+  n5 -> n2;
+}
