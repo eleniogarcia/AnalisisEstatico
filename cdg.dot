@@ -1,15 +1,12 @@
-digraph CFG {
-  node [shape=box, fontname="Helvetica", style=filled, fillcolor=lightblue];
+digraph CDG {
+  rankdir=TB;
+  node [shape=box, fontname="Helvetica", style=filled];
   n0 [label="x := 3", fillcolor=lightblue];
-  n0 -> n1;
   n1 [label="if (y)", fillcolor=lightyellow];
-  n1 -> n2;
-  n1 -> n3;
   n3 [label="y := x + z", fillcolor=lightblue];
-  n3 -> n4;
   n4 [label="return z", fillcolor=lightcoral];
-  n4 -> n5;
-  n5 [label="EXIT", fillcolor=lightblue];
+  n5 [label="EXIT", fillcolor=gray];
   n2 [label="z := x + 1", fillcolor=lightblue];
-  n2 -> n4;
+  n1 -> n2 [style=dashed, color=blue];
+  n1 -> n3 [style=dashed, color=blue];
 }

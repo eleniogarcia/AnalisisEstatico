@@ -1,7 +1,7 @@
 digraph PostDomTree {
   rankdir=TB;
   node [shape=box, fontname="Helvetica", style=filled];
-  n0 [label="x := 4", fillcolor=lightgreen];
+  n0 [label="x := 3", fillcolor=lightgreen];
   n1 [label="if (y)", fillcolor=lightyellow];
   n3 [label="y := x + z", fillcolor=lightgreen];
   n4 [label="return z", fillcolor=lightblue];

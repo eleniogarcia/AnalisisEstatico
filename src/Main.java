@@ -56,6 +56,13 @@ public class Main {
         DominanceAnalysis analysis = new DominanceAnalysis();
         analysis.computePostDominators(allNodes, exitNode);
 
+        // --- PUNTO 2: Post dominadores---
+        System.out.println("\n--- Postdominadores ---");
+        for (CFGNode n : allNodes) {
+            System.out.print("  pdom( " + n.label + " ) = { ");
+            for (CFGNode pd : analysis.postDominators.get(n)) System.out.print(pd.label + "  ");
+            System.out.println("}");
+        }
         // --- PUNTO 3: Árbol de Postdominadores ---
         PostDominatorTree pdTree = new PostDominatorTree();
         pdTree.build(allNodes, analysis.postDominators, exitNode);
@@ -64,6 +71,16 @@ public class Main {
         PrintWriter pw3 = new PrintWriter(new OutputStreamWriter(new FileOutputStream("postdom_tree.dot"), "UTF-8"));
         pdTree.exportDot(allNodes, exitNode, pw3);
         pw3.close();
+
+        // --- PUNTO 4: Control Dependence Graph ---
+        System.out.println("\n=== PUNTO 4: Control Dependence Graph ===");
+        ControlDependenceGraph cdg = new ControlDependenceGraph();
+        cdg.build(allNodes, analysis.postDominators, pdTree.iPostDom, exitNode);
+        cdg.print(allNodes);
+
+        PrintWriter pw4 = new PrintWriter(new OutputStreamWriter(new FileOutputStream("cdg.dot"), "UTF-8"));
+        cdg.exportDot(allNodes, pw4);
+        pw4.close();
 
         System.out.println("\n✅ Proceso completado. Archivos .dot generados.");
     }
