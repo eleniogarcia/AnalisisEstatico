@@ -9,19 +9,42 @@ public class PostDominatorTree {
 
     public void build(List<CFGNode> allNodes, Map<CFGNode, Set<CFGNode>> postDominators, CFGNode exitNode) {
         for (CFGNode n : allNodes) {
-            if (n == exitNode) { iPostDom.put(n, null); continue; }
+            if (n == exitNode) {
+                iPostDom.put(n, null);
+                continue;
+            }
+
+            // Candidatos: todos los postdominadores de n, excepto n mismo
             Set<CFGNode> candidates = new HashSet<>(postDominators.get(n));
             candidates.remove(n);
-            if (candidates.isEmpty()) { iPostDom.put(n, null); continue; }
+
+            if (candidates.isEmpty()) {
+                iPostDom.put(n, null);
+                continue;
+            }
+
+            // El ipdom de n es el candidato c tal que:
+            // c NO postdomina a ningun otro candidato
+            // Es decir: c NO aparece en pdom(d) para ningun otro candidato d
+            // Esto significa que c es el "mas cercano" a n en el camino hacia EXIT
             CFGNode ipdom = null;
             for (CFGNode candidate : candidates) {
                 boolean esInmediato = true;
                 for (CFGNode other : candidates) {
                     if (other == candidate) continue;
-                    if (!postDominators.get(other).contains(candidate)) { esInmediato = false; break; }
+                    // Si candidate aparece en pdom(other), significa que
+                    // other es mas cercano a n que candidate -> candidate NO es ipdom
+                    if (postDominators.get(other).contains(candidate)) {
+                        esInmediato = false;
+                        break;
+                    }
                 }
-                if (esInmediato) { ipdom = candidate; break; }
+                if (esInmediato) {
+                    ipdom = candidate;
+                    break;
+                }
             }
+
             iPostDom.put(n, ipdom);
         }
     }

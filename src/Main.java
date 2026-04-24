@@ -8,9 +8,8 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Reader input;
-        String nombreArchivo = "ejemplo.txt"; // Nombre por defecto
+        String nombreArchivo = "ejemplo.txt";
 
-        // Lógica para decidir qué archivo leer
         if (args.length > 0) {
             nombreArchivo = args[0];
             System.out.println("Leyendo archivo desde argumentos: " + nombreArchivo);
@@ -20,13 +19,12 @@ public class Main {
 
         File file = new File(nombreArchivo);
         if (!file.exists()) {
-            System.err.println("Error: No se encontró el archivo '" + nombreArchivo + "' en la raíz del proyecto.");
+            System.err.println("Error: No se encontró el archivo '" + nombreArchivo + "'");
             return;
         }
-
         input = new FileReader(file);
 
-        // --- PROCESO DE PARSEO ---
+        // --- PARSEO ---
         Lexer lexer = new Lexer(input);
         Parser parser = new Parser(lexer);
         Node programa;
@@ -41,7 +39,7 @@ public class Main {
         // --- PUNTO 1: CFG ---
         CFGBuilder builder = new CFGBuilder();
         CFGNode[] result = builder.build(programa);
-        CFGNode entry = result[0];
+        CFGNode entry = result[0];   // primer nodo real del programa
         CFGNode exitNode = new CFGNode("EXIT");
         for (int i = 1; i < result.length; i++) result[i].addEdge(exitNode);
 
@@ -63,7 +61,7 @@ public class Main {
             System.out.println("}");
         }
 
-        // --- PUNTO 3: Árbol de Postdominadores ---
+        // --- PUNTO 3: Arbol de Postdominadores ---
         PostDominatorTree pdTree = new PostDominatorTree();
         pdTree.build(allNodes, analysis.postDominators, exitNode);
         pdTree.print(allNodes);
@@ -76,7 +74,7 @@ public class Main {
         // --- PUNTO 4: Control Dependence Graph ---
         System.out.println("\n=== PUNTO 4: Control Dependence Graph ===");
         ControlDependenceGraph cdg = new ControlDependenceGraph();
-        cdg.build(allNodes, analysis.postDominators, pdTree.iPostDom, exitNode);
+        cdg.build(allNodes, analysis.postDominators, pdTree.iPostDom, entry, exitNode);
         cdg.print(allNodes);
 
         PrintWriter pw4 = new PrintWriter(new OutputStreamWriter(new FileOutputStream("cdg.dot"), "UTF-8"));
