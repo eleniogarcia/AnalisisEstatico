@@ -45,10 +45,10 @@ public class Main {
         CFGNode exitNode = new CFGNode("EXIT");
         for (int i = 1; i < result.length; i++) result[i].addEdge(exitNode);
 
-        // Exportar Grafo (Punto 1)
         PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream("cfg.dot"), "UTF-8"));
         new DotExporter().export(entry, pw);
         pw.close();
+        generatePng("cfg.dot", "cfg.png");
 
         // --- PUNTO 2: Postdominadores ---
         List<CFGNode> allNodes = getAllNodes(entry);
@@ -56,21 +56,22 @@ public class Main {
         DominanceAnalysis analysis = new DominanceAnalysis();
         analysis.computePostDominators(allNodes, exitNode);
 
-        // --- PUNTO 2: Post dominadores---
         System.out.println("\n--- Postdominadores ---");
         for (CFGNode n : allNodes) {
             System.out.print("  pdom( " + n.label + " ) = { ");
             for (CFGNode pd : analysis.postDominators.get(n)) System.out.print(pd.label + "  ");
             System.out.println("}");
         }
+
         // --- PUNTO 3: Árbol de Postdominadores ---
         PostDominatorTree pdTree = new PostDominatorTree();
         pdTree.build(allNodes, analysis.postDominators, exitNode);
-        pdTree.print(allNodes); // Imprime en consola el IPDom de cada nodo
+        pdTree.print(allNodes);
 
         PrintWriter pw3 = new PrintWriter(new OutputStreamWriter(new FileOutputStream("postdom_tree.dot"), "UTF-8"));
         pdTree.exportDot(allNodes, exitNode, pw3);
         pw3.close();
+        generatePng("postdom_tree.dot", "postdom_tree.png");
 
         // --- PUNTO 4: Control Dependence Graph ---
         System.out.println("\n=== PUNTO 4: Control Dependence Graph ===");
@@ -81,8 +82,22 @@ public class Main {
         PrintWriter pw4 = new PrintWriter(new OutputStreamWriter(new FileOutputStream("cdg.dot"), "UTF-8"));
         cdg.exportDot(allNodes, pw4);
         pw4.close();
+        generatePng("cdg.dot", "cdg.png");
 
-        System.out.println("\n✅ Proceso completado. Archivos .dot generados.");
+        System.out.println("\n✅ Proceso completado. Archivos .dot y .png generados.");
+    }
+
+    private static void generatePng(String dotFile, String pngFile) {
+        try {
+            String dotExe = "C:\\Program Files\\Graphviz\\bin\\dot.exe";
+            ProcessBuilder pb = new ProcessBuilder(dotExe, "-Tpng", dotFile, "-o", pngFile);
+            pb.redirectErrorStream(true);
+            Process p = pb.start();
+            p.waitFor();
+            System.out.println("🖼️  " + pngFile + " generado.");
+        } catch (Exception e) {
+            System.out.println("Error generando " + pngFile + ": " + e.getMessage());
+        }
     }
 
     private static List<CFGNode> getAllNodes(CFGNode start) {
