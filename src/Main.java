@@ -39,7 +39,7 @@ public class Main {
         // --- PUNTO 1: CFG ---
         CFGBuilder builder = new CFGBuilder();
         CFGNode[] result = builder.build(programa);
-        CFGNode entry = result[0];   // primer nodo real del programa
+        CFGNode entry = result[0];
         CFGNode exitNode = new CFGNode("EXIT");
         for (int i = 1; i < result.length; i++) result[i].addEdge(exitNode);
 
@@ -48,9 +48,11 @@ public class Main {
         pw.close();
         generatePng("cfg.dot", "cfg.png");
 
-        // --- PUNTO 2: Postdominadores ---
+        // Recolectar todos los nodos
         List<CFGNode> allNodes = getAllNodes(entry);
         if (!allNodes.contains(exitNode)) allNodes.add(exitNode);
+
+        // --- PUNTO 2: Postdominadores ---
         DominanceAnalysis analysis = new DominanceAnalysis();
         analysis.computePostDominators(allNodes, exitNode);
 
@@ -81,6 +83,23 @@ public class Main {
         cdg.exportDot(allNodes, pw4);
         pw4.close();
         generatePng("cdg.dot", "cdg.png");
+
+        // --- PUNTO 5: Reaching Definitions ---
+        System.out.println("\n=== PUNTO 5: Reaching Definitions ===");
+        ReachingDefinitions rd = new ReachingDefinitions();
+        rd.compute(allNodes);
+        rd.print(allNodes);
+
+        // --- PUNTO 6: Data Dependence Graph (DDG) ---
+        System.out.println("\n=== PUNTO 6: Data Dependence Graph (DDG) ===");
+        DataDependenceGraph ddg = new DataDependenceGraph();
+        ddg.build(allNodes, rd);
+        ddg.print(allNodes);
+
+        PrintWriter pw6 = new PrintWriter(new OutputStreamWriter(new FileOutputStream("ddg.dot"), "UTF-8"));
+        ddg.exportDot(allNodes, pw6);
+        pw6.close();
+        generatePng("ddg.dot", "ddg.png");
 
         System.out.println("\n✅ Proceso completado. Archivos .dot y .png generados.");
     }
