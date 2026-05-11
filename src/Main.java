@@ -8,7 +8,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Reader input;
-        String nombreArchivo = "ejemplo.txt";
+        String nombreArchivo = "test_if_while.txt";
 
         if (args.length > 0) {
             nombreArchivo = args[0];
@@ -48,7 +48,6 @@ public class Main {
         pw.close();
         generatePng("cfg.dot", "cfg.png");
 
-        // Recolectar todos los nodos
         List<CFGNode> allNodes = getAllNodes(entry);
         if (!allNodes.contains(exitNode)) allNodes.add(exitNode);
 
@@ -89,6 +88,11 @@ public class Main {
         ReachingDefinitions rd = new ReachingDefinitions();
         rd.compute(allNodes);
         rd.print(allNodes);
+
+        PrintWriter pw5 = new PrintWriter(new OutputStreamWriter(new FileOutputStream("reaching_def.dot"), "UTF-8"));
+        rd.exportDot(allNodes, pw5);
+        pw5.close();
+        generatePng("reaching_def.dot", "reaching_def.png");
 
         // --- PUNTO 6: Data Dependence Graph (DDG) ---
         System.out.println("\n=== PUNTO 6: Data Dependence Graph (DDG) ===");

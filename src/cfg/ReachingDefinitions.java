@@ -1,37 +1,18 @@
 package cfg;
 
 import ast.AssignStmt;
+import java.io.PrintWriter;
 import java.util.*;
 
-/**
- * Reaching Definitions — Análisis de Data Flow (forward, may).
- *
- * Para cada nodo n calcula:
- *   GEN(n)  = definición que produce el nodo (solo AssignStmt genera definición)
- *   KILL(n) = todas las otras definiciones de la misma variable en el programa
- *   IN(n)   = union de OUT de todos los predecesores
- *   OUT(n)  = GEN(n) U (IN(n) - KILL(n))
- *
- * Una "definición" se representa como el par (CFGNode, String variable).
- */
 public class ReachingDefinitions {
 
-    // Para cada nodo: su definición generada. Null si no genera ninguna.
     public Map<CFGNode, Definition> gen  = new HashMap<>();
-
-    // Para cada nodo: el conjunto de definiciones que mata
     public Map<CFGNode, Set<Definition>> kill = new HashMap<>();
-
-    // Resultados del análisis iterativo
     public Map<CFGNode, Set<Definition>> in  = new HashMap<>();
     public Map<CFGNode, Set<Definition>> out = new HashMap<>();
 
-    // Todas las definiciones del programa
     private Set<Definition> allDefs = new LinkedHashSet<>();
 
-    /**
-     * Representa una definición: el nodo donde se define y la variable definida.
-     */
     public static class Definition {
         public CFGNode node;
         public String  variable;
@@ -61,7 +42,7 @@ public class ReachingDefinitions {
 
     public void compute(List<CFGNode> allNodes) {
 
-        // --- Paso 1: Calcular GEN de cada nodo ---
+        // Paso 1: GEN
         for (CFGNode n : allNodes) {
             if (n.astNode instanceof AssignStmt) {
                 AssignStmt a = (AssignStmt) n.astNode;
@@ -73,8 +54,7 @@ public class ReachingDefinitions {
             }
         }
 
-        // --- Paso 2: Calcular KILL de cada nodo ---
-        // Un nodo que define variable v mata todas las otras definiciones de v
+        // Paso 2: KILL
         for (CFGNode n : allNodes) {
             Set<Definition> killSet = new LinkedHashSet<>();
             Definition myDef = gen.get(n);
@@ -88,29 +68,25 @@ public class ReachingDefinitions {
             kill.put(n, killSet);
         }
 
-        // --- Paso 3: Inicializar IN y OUT ---
+        // Paso 3: Inicializar IN y OUT
         for (CFGNode n : allNodes) {
-            in.put(n,  new LinkedHashSet<>());
-            // OUT se inicializa con GEN
+            in.put(n, new LinkedHashSet<>());
             Set<Definition> outSet = new LinkedHashSet<>();
             if (gen.get(n) != null) outSet.add(gen.get(n));
             out.put(n, outSet);
         }
 
-        // --- Paso 4: Iterar hasta punto fijo ---
+        // Paso 4: Iterar hasta punto fijo
         boolean changed = true;
         while (changed) {
             changed = false;
             for (CFGNode n : allNodes) {
-
-                // IN(n) = union de OUT de todos los predecesores
                 Set<Definition> inSet = new LinkedHashSet<>();
                 for (CFGNode pred : n.predecessors) {
                     inSet.addAll(out.get(pred));
                 }
                 in.put(n, inSet);
 
-                // OUT(n) = GEN(n) U (IN(n) - KILL(n))
                 Set<Definition> newOut = new LinkedHashSet<>();
                 if (gen.get(n) != null) newOut.add(gen.get(n));
                 for (Definition d : inSet) {
@@ -135,6 +111,53 @@ public class ReachingDefinitions {
                     setToString(in.get(n)),
                     setToString(out.get(n)));
         }
+    }
+
+    public void exportDot(List<CFGNode> allNodes, PrintWriter out) {
+        out.println("digraph ReachingDefinitions {");
+        out.println("  rankdir=TB;");
+        out.println("  node [shape=box, fontname=\"Helvetica\", style=filled, fillcolor=lightyellow];");
+
+        for (CFGNode n : allNodes) {
+            Definition myGen    = gen.get(n);
+            Set<Definition> myKill = kill.get(n);
+            Set<Definition> myIn   = in.get(n);
+            Set<Definition> myOut  = this.out.get(n);
+
+            String genStr  = (myGen != null) ? "{" + myGen + "}" : "{}";
+            String killStr = (myKill != null && !myKill.isEmpty()) ? setToString(myKill) : "{}";
+            String inStr   = (myIn   != null && !myIn.isEmpty())   ? setToString(myIn)   : "{}";
+            String outStr  = (myOut  != null && !myOut.isEmpty())  ? setToString(myOut)  : "{}";
+
+            String label = n.label + "\\n"
+                    + "GEN="  + genStr  + "\\n"
+                    + "KILL=" + killStr + "\\n"
+                    + "IN="   + inStr   + "\\n"
+                    + "OUT="  + outStr;
+
+            String color = "lightyellow";
+            if (n.label.equals("EXIT"))            color = "gray";
+            else if (n.label.startsWith("if"))     color = "lightcyan";
+            else if (n.label.startsWith("while"))  color = "lightsalmon";
+            else if (n.label.startsWith("return")) color = "lightcoral";
+
+            out.printf("  n%d [label=\"%s\", fillcolor=%s];%n",
+                    n.id, label, color);
+        }
+
+        out.println();
+
+        Set<String> drawn = new HashSet<>();
+        for (CFGNode n : allNodes) {
+            for (CFGNode succ : n.successors) {
+                String key = n.id + "->" + succ.id;
+                if (drawn.add(key)) {
+                    out.printf("  n%d -> n%d;%n", n.id, succ.id);
+                }
+            }
+        }
+
+        out.println("}");
     }
 
     private String setToString(Set<Definition> set) {

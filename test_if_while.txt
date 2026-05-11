@@ -1,0 +1,13 @@
+integer f() {
+    x = 1 ;
+    while (x) {
+        if (x) {
+            y = x + 1 ;
+        }
+        else {
+            y = 0 ;
+        }
+        x = y + 1 ;
+    }
+    return y ;
+}

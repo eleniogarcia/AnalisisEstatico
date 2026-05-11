@@ -1,0 +1,22 @@
+digraph ReachingDefinitions {
+  rankdir=TB;
+  node [shape=box, fontname="Helvetica", style=filled, fillcolor=lightyellow];
+  n0 [label="x := 1\nGEN={0:x}\nKILL={5:x }\nIN={}\nOUT={0:x }", fillcolor=lightyellow];
+  n1 [label="while (x)\nGEN={}\nKILL={}\nIN={5:x 3:y 4:y 0:x }\nOUT={5:x 3:y 4:y 0:x }", fillcolor=lightsalmon];
+  n6 [label="return y\nGEN={}\nKILL={}\nIN={5:x 3:y 4:y 0:x }\nOUT={5:x 3:y 4:y 0:x }", fillcolor=lightcoral];
+  n7 [label="EXIT\nGEN={}\nKILL={}\nIN={5:x 3:y 4:y 0:x }\nOUT={5:x 3:y 4:y 0:x }", fillcolor=gray];
+  n2 [label="if (x)\nGEN={}\nKILL={}\nIN={5:x 3:y 4:y 0:x }\nOUT={5:x 3:y 4:y 0:x }", fillcolor=lightcyan];
+  n4 [label="y := 0\nGEN={4:y}\nKILL={3:y }\nIN={5:x 3:y 4:y 0:x }\nOUT={4:y 5:x 0:x }", fillcolor=lightyellow];
+  n5 [label="x := y + 1\nGEN={5:x}\nKILL={0:x }\nIN={3:y 5:x 0:x 4:y }\nOUT={5:x 3:y 4:y }", fillcolor=lightyellow];
+  n3 [label="y := x + 1\nGEN={3:y}\nKILL={4:y }\nIN={5:x 3:y 4:y 0:x }\nOUT={3:y 5:x 0:x }", fillcolor=lightyellow];
+
+  n0 -> n1;
+  n1 -> n2;
+  n1 -> n6;
+  n6 -> n7;
+  n2 -> n3;
+  n2 -> n4;
+  n4 -> n5;
+  n5 -> n1;
+  n3 -> n5;
+}

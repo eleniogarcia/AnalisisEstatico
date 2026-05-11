@@ -1,15 +1,20 @@
 digraph CFG {
   node [shape=box, fontname="Helvetica", style=filled, fillcolor=lightblue];
-  n0 [label="x := 3", fillcolor=lightblue];
+  n0 [label="x := 1", fillcolor=lightblue];
   n0 -> n1;
-  n1 [label="if (y)", fillcolor=lightyellow];
+  n1 [label="while (x)", fillcolor=lightsalmon];
   n1 -> n2;
-  n1 -> n3;
-  n3 [label="y := x + z", fillcolor=lightblue];
-  n3 -> n4;
-  n4 [label="return z", fillcolor=lightcoral];
-  n4 -> n5;
-  n5 [label="EXIT", fillcolor=lightblue];
-  n2 [label="z := x + 1", fillcolor=lightblue];
+  n1 -> n6;
+  n6 [label="return y", fillcolor=lightcoral];
+  n6 -> n7;
+  n7 [label="EXIT", fillcolor=lightblue];
+  n2 [label="if (x)", fillcolor=lightyellow];
+  n2 -> n3;
   n2 -> n4;
+  n4 [label="y := 0", fillcolor=lightblue];
+  n4 -> n5;
+  n5 [label="x := y + 1", fillcolor=lightblue];
+  n5 -> n1;
+  n3 [label="y := x + 1", fillcolor=lightblue];
+  n3 -> n5;
 }

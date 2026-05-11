@@ -1,15 +1,19 @@
 digraph PostDomTree {
   rankdir=TB;
   node [shape=box, fontname="Helvetica", style=filled];
-  n0 [label="x := 3", fillcolor=lightgreen];
-  n1 [label="if (y)", fillcolor=lightyellow];
-  n3 [label="y := x + z", fillcolor=lightgreen];
-  n4 [label="return z", fillcolor=lightblue];
-  n5 [label="EXIT", fillcolor=lightcoral];
-  n2 [label="z := x + 1", fillcolor=lightgreen];
+  n0 [label="x := 1", fillcolor=lightgreen];
+  n1 [label="while (x)", fillcolor=lightsalmon];
+  n6 [label="return y", fillcolor=lightblue];
+  n7 [label="EXIT", fillcolor=lightcoral];
+  n2 [label="if (x)", fillcolor=lightyellow];
+  n4 [label="y := 0", fillcolor=lightgreen];
+  n5 [label="x := y + 1", fillcolor=lightgreen];
+  n3 [label="y := x + 1", fillcolor=lightgreen];
   n1 -> n0;
-  n4 -> n1;
-  n4 -> n3;
+  n6 -> n1;
+  n7 -> n6;
+  n5 -> n2;
   n5 -> n4;
-  n4 -> n2;
+  n1 -> n5;
+  n5 -> n3;
 }
