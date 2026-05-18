@@ -1,0 +1,22 @@
+digraph Slice {
+  rankdir=TB;
+  node [shape=box, fontname="Helvetica", style=filled];
+  n0 [label="x := 1", fillcolor=lightgreen, penwidth=3];
+  n1 [label="while (x)", fillcolor=orange, penwidth=3];
+  n6 [label="return y", fillcolor=gold, penwidth=3];
+  n7 [label="EXIT", fillcolor=lightgray];
+  n2 [label="if (x)", fillcolor=yellow, penwidth=3];
+  n4 [label="y := 0", fillcolor=lightgreen, penwidth=3];
+  n5 [label="x := y + 1", fillcolor=lightgreen, penwidth=3];
+  n3 [label="y := x + 1", fillcolor=lightgreen, penwidth=3];
+
+  n0 -> n1 [color=green, penwidth=2];
+  n1 -> n2 [color=green, penwidth=2];
+  n1 -> n6 [color=green, penwidth=2];
+  n6 -> n7 [color=lightgray];
+  n2 -> n3 [color=green, penwidth=2];
+  n2 -> n4 [color=green, penwidth=2];
+  n4 -> n5 [color=green, penwidth=2];
+  n5 -> n1 [color=green, penwidth=2];
+  n3 -> n5 [color=green, penwidth=2];
+}

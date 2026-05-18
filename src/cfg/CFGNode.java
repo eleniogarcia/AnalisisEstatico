@@ -10,6 +10,8 @@ public class CFGNode {
     public List<CFGNode> successors   = new ArrayList<>();
     public List<CFGNode> predecessors = new ArrayList<>();
     private static int counter = 0;
+
+    public static void resetCounter() { counter = 0; }
     public int id;
 
     public CFGNode(String label, Node astNode) {

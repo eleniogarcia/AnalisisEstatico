@@ -8,7 +8,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Reader input;
-        String nombreArchivo = "test_if_while.txt";
+        String nombreArchivo = "ejemplo.txt";
 
         if (args.length > 0) {
             nombreArchivo = args[0];
@@ -35,6 +35,9 @@ public class Main {
             System.err.println("❌ Error durante el parseo: " + e.getMessage());
             throw e;
         }
+
+        // Resetear contador de nodos
+        CFGNode.resetCounter();
 
         // --- PUNTO 1: CFG ---
         CFGBuilder builder = new CFGBuilder();
@@ -104,6 +107,58 @@ public class Main {
         ddg.exportDot(allNodes, pw6);
         pw6.close();
         generatePng("ddg.dot", "ddg.png");
+
+        // --- PUNTO 7: Program Dependence Graph (PDG) ---
+        System.out.println("\n=== PUNTO 7: Program Dependence Graph (PDG) ===");
+        ProgramDependenceGraph pdg = new ProgramDependenceGraph();
+        pdg.build(allNodes, cdg, ddg);
+
+        PrintWriter pw7 = new PrintWriter(new OutputStreamWriter(new FileOutputStream("pdg.dot"), "UTF-8"));
+        pdg.exportDot(allNodes, cdg, ddg, pw7);
+        pw7.close();
+        generatePng("pdg.dot", "pdg.png");
+        System.out.println("PDG generado: pdg.dot / pdg.png");
+
+        // --- PUNTO 8: Program Slicing interactivo ---
+        System.out.println("\n=== PUNTO 8: Program Slicing (Backward Slice) ===");
+
+        // Mostrar nodos disponibles (sin EXIT)
+        List<CFGNode> sliceableNodes = new ArrayList<>();
+        for (CFGNode n : allNodes) {
+            if (!n.label.equals("EXIT")) sliceableNodes.add(n);
+        }
+
+        System.out.println("\nNodos disponibles para slicing:");
+        for (int i = 0; i < sliceableNodes.size(); i++) {
+            System.out.printf("  [%d] %s%n", i, sliceableNodes.get(i).label);
+        }
+
+        // Pedir al usuario que elija
+        Scanner scanner = new Scanner(System.in);
+        int eleccion = -1;
+        while (eleccion < 0 || eleccion >= sliceableNodes.size()) {
+            System.out.print("\nElegí el número del nodo criterio: ");
+            try {
+                eleccion = Integer.parseInt(scanner.nextLine().trim());
+                if (eleccion < 0 || eleccion >= sliceableNodes.size()) {
+                    System.out.println("Número inválido, intentá de nuevo.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Ingresá un número válido.");
+            }
+        }
+
+        CFGNode criterio = sliceableNodes.get(eleccion);
+
+        ProgramSlicer slicer = new ProgramSlicer();
+        slicer.compute(criterio, pdg);
+        slicer.print();
+
+        PrintWriter pw8 = new PrintWriter(new OutputStreamWriter(new FileOutputStream("slice.dot"), "UTF-8"));
+        slicer.exportDot(allNodes, exitNode, pw8);
+        pw8.close();
+        generatePng("slice.dot", "slice.png");
+        System.out.println("Slice generado: slice.dot / slice.png");
 
         System.out.println("\n✅ Proceso completado. Archivos .dot y .png generados.");
     }
